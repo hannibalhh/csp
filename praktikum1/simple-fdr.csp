@@ -1,0 +1,28 @@
+
+channel a, b, c, d, f
+
+A={|a, b |}
+
+P = a -> b -> c -> SKIP
+Q = a -> ((c -> d -> SKIP ) [] (b -> f -> SKIP))
+
+-- sequential processes
+S1 = P;Q
+
+-- sharing (synchronisation over A)
+S2 = P [| A |] Q
+
+-- interleaving
+S3 = P ||| Q
+
+-- deterministic "or"
+S4 = P [] Q
+
+-- interrupt 
+S5 = P /\ Q
+
+
+assert S3 [T= S2
+assert S3 [T= S1 -- works!
+assert S3 [T= S4
+assert S3 [T= S5
