@@ -1,0 +1,10 @@
+channel a, b, c, d
+
+P = a -> b -> SKIP
+Q = a -> c -> STOP
+R = c -> d -> R
+SYS1 = (P [] Q) |~| R
+SYS2 = P [] Q
+SYS3 = P |~| Q
+SYS4 = P [] R
+SYS5 = P |~| R
