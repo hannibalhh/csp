@@ -33,7 +33,10 @@ MELDER = check!0 -> check!1 -> MELDER_ALARM_SUB
 --System-Deklaration -- zu ergänzen
 --===================================================
  
-SYS = CHECK_MELDER
+SYS =  (
+		CHECK_MELDER [| {ack, smoke.0, smoke.1,no_smoke.0, no_smoke.1, alarm } |] MELDER--_ALARM_SUB
+		[] ( CHECK_MELDER [| {no_smoke.0, no_smoke.1, ack, smoke.1, smoke.0} |] RESET_MELDER)
+		) ; SYS
 
 --===================================================
 
@@ -52,9 +55,8 @@ RCV_SMOKES =    smoke.0 -> smoke.1 -> SKIP
 	    |~| no_smoke.0 -> no_smoke.1 -> RCV_SMOKES
 	    |~| no_smoke.1 -> no_smoke.0 -> RCV_SMOKES
 
+
 --Check der Implementierung
  assert CHECK_MELDER [F= SYS\{| check, reset |}
-
-
 
 
