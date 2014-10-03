@@ -2,8 +2,8 @@ nametype SId = {0,1}
 
 --===================================================
 -- Channel-Deklarationen zum Ergänzen (1 oder mehrere Deklarationszeilen)
-channel reset, check, smoke : SId 
-channel no_smoke, ack, alarm
+channel reset, check, smoke, no_smoke : SId 
+channel ack, alarm
 --===================================================
 
 
@@ -33,7 +33,7 @@ MELDER = check!0 -> check!1 -> MELDER_ALARM_SUB
 --System-Deklaration -- zu ergänzen
 --===================================================
  
-SYS = SENSOR(1) 
+SYS = CHECK_MELDER
 
 --===================================================
 
