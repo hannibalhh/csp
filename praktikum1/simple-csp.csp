@@ -1,10 +1,17 @@
+-- Aufgabe 1.1
+
 channel a, b, c, d
 
 P = a -> b -> SKIP
 Q = a -> c -> STOP
 R = c -> d -> R
+
 SYS1 = (P [] Q) |~| R
+-- External Choice
 SYS2 = P [] Q
+-- Internal Choice: non-determinstic (with espsilon)
 SYS3 = P |~| Q
 SYS4 = P [] R
 SYS5 = P |~| R
+
+assert R :[deadlock free [F]]

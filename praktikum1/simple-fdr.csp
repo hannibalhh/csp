@@ -1,9 +1,10 @@
+-- Aufgabe 1.2
 
 channel a, b, c, d, f
 
 A={|a, b |}
 
-P = a -> b -> c -> SKIP
+P = a -> b -> c -> P
 Q = a -> ((c -> d -> SKIP ) [] (b -> f -> SKIP))
 
 -- sequential processes
@@ -21,6 +22,10 @@ S4 = P [] Q
 -- interrupt 
 S5 = P /\ Q
 
+
+-- The traces model, written as [T=;
+-- The failures model, written as [F=;
+-- The failures-divergences model, written as [FD=.
 
 assert S3 [T= S2
 assert S3 [T= S1 -- works!
