@@ -40,9 +40,10 @@ channel wr  -- zum Schreiben in den Puffer
 
 BUF = B(<>)
 
-B(s) = (#s > 0)&rd!head(s) -> B(tail(s))
+B(s) = (#s > 0)&rd!head(s) ; B(tail(s))  -- "->" zu ";"
        []
-       (#s < max)&wr?x -> B(s^<x>)
+       (#s < max)&wr?x -> B(s^<x>)  --  
+
 
 
 -----------------------------------------------------------------
@@ -142,12 +143,11 @@ CB(i,x) = crd.i!x -> CB(i,x)
 ----------------------------------------------------------------
 
 READ_CON = 
-	 rd_ri?x -> rd_wi?y;
-	 if (x !=y)
-	 then READ_CON
-	 else
-		crd.x?z -> wr_ri!((x+1)%(max+1)) -> READ_CON
-
+	 rd_ri?x -> rd_wi?y ->  -- "->" war vorher ";"
+	 if (x != y)
+	then READ_CON
+	else
+	 crd.x?z -> wr_ri!((x+1)%(max+1)) -> READ_CON
 ----------------------------------------------------------------
 -- Konkrete Spec des Writers:
 -- Lies Read/write Index. Falls 
@@ -167,10 +167,10 @@ WR_CON(d) =
 	 rd_ri?x -> rd_wi?y ->
 	 let wi = y%(max+1)
 	 within
-		if (x = wi)
+		if (x == wi)  -- "=" zu "=="
 	 	then WRITE_CON
 	 	else
-		cwr.y!d -> wr_wi!wi; WRITE_CON
+		cwr.y!d -> wr_wi!wi -> WRITE_CON -- ";" zu "->"
 
 
 ----------------------------------------------------------------
