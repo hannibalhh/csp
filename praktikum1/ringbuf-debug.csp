@@ -76,7 +76,7 @@ WRABS(x)  = wr!x -> WRITE_ABS
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 
-SYS_CON = (READ_INDEX ||| WRITE_INDEX)
+SYS_CON = (READ_INDEX ||| WRITE_INDEX) -- TODO : add parameter
 	  [|{| rd_ri, rd_wi |}|]
 	  (WRITE_CON ||| READ_CON)
 
@@ -192,7 +192,7 @@ SYS_CON_IDENT =
 -- die nur in der Implementierung vorkommen
 ----------------------------------------------------------------
 
-M = { rd_ri,rd_wi,wr_ri,wr_wi }
+M = {| rd_ri,rd_wi,wr_ri,wr_wi |}  -- added "|" --> alle auspraegungen dieser channels
 
 ASYS_CHAOS = ASYS ||| CHAOS(M)
 
