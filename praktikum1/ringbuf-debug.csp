@@ -28,8 +28,9 @@ DATA = { 0..2 }
 
 max = 2
 
-channel rd  -- zum Lesen aus dem Puffer
-channel wr  -- zum Schreiben in den Puffer
+-- added Type DATA to declaration
+channel rd : DATA -- zum Lesen aus dem Puffer
+channel wr : DATA -- zum Schreiben in den Puffer
 
 -- In CSP koennen Sequenzen als Datenstrukturen
 -- in Prozessparametern verwendet werden:
@@ -38,11 +39,11 @@ channel wr  -- zum Schreiben in den Puffer
 -- head(s) und tail(s) definiert wie gewohnt.
 -- #s ist die Laenge der Sequenz.
 
-BUF = B(<>)
+BUF =  B(<>)
 
-B(s) = (#s > 0)&rd!head(s) ; B(tail(s))  -- "->" zu ";"
+B(s) = (#s > 0) & rd!head(s) -> B(tail(s))  -- "->" zu ";"
        []
-       (#s < max)&wr?x -> B(s^<x>)  --  
+       (#s < max) & wr?x -> B(s^<x>)  --  
 
 
 
