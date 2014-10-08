@@ -1,0 +1,47 @@
+channel hinein, vor, rechts, links, hinaus
+
+L = hinein -> (HAPPY  |~|  A  |~|   B  |~|  C |~|  D)
+A =  vor -> rechts -> SKIP
+B =  vor -> vor -> vor -> rechts -> SKIP
+C = rechts -> vor -> links -> vor -> vor -> links -> SKIP
+D = rechts -> vor -> vor -> links -> vor -> vor -> SKIP
+HAPPY =  rechts -> vor -> links -> vor  -> vor -> rechts -> hinaus -> SKIP
+
+assert L [T= (hinein -> HAPPY)
+
+LAB1 = hinein -> (
+vor -> (rechts -> STOP
+    []
+    vor -> vor -> rechts -> STOP
+    )
+[]
+rechts -> vor -> (
+    vor -> links -> vor -> STOP
+    []
+    links -> vor -> (
+        links -> STOP
+        []
+        vor -> rechts -> hinaus -> SKIP
+        )
+    )
+)
+
+assert LAB1 [T= (hinein -> HAPPY)
+
+simple1 = hinein -> vor -> vor -> STOP
+assert LAB1 [T= simple1
+
+simple2 = hinein -> links -> STOP
+assert not LAB1 [T= simple2
+
+H = {vor, rechts, links} -- {[vor, links, rechts]}
+
+success = hinein  -> hinaus -> SKIP
+
+assert LAB1 \ H [T= success
+assert success [T= LAB1 \ H
+
+assert LAB1 [T= success ||| CHAOS(H)
+--assert success ||| CHAOS(H) [T= LAB1
+
+ assert LAB1 [|{| hinein, hinaus |}|] success :[deadlock free [T]]
