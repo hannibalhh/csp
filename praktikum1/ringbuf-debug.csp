@@ -41,8 +41,8 @@ channel wr : DATA -- zum Schreiben in den Puffer
 
 BUF =  B(<>)
 
-B(s) = (#s > 0) & rd!head(s) -> B(tail(s))  -- "->" zu ";"
-       []
+B(s) = (#s > 0) & rd!head(s) -> B(tail(s)) -- hier zeigt sich der Fehler mit "alle auspraegungen " 
+        []
        (#s < max) & wr?x -> B(s^<x>)  --  
 
 
@@ -55,7 +55,7 @@ channel process_rd  -- abstraktes Ereignis: verarbeite die gelesenen Daten
 
 
 READ_ABS = rd?x -> process_rd -> READ_ABS
-
+--READ_ABS = rd?x -> READ_ABS 			-- XXX process_rd macht kein sinn und wird nirgendwo genutzt
 
 
 -----------------------------------------------------------------
@@ -76,9 +76,10 @@ WRABS(x)  = wr!x -> WRITE_ABS
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 
-SYS_CON = (READ_INDEX(0) ||| WRITE_INDEX(0)) -- TODO : add parameter
-	  [|{| rd_ri, rd_wi |}|]
-	  (WRITE_CON ||| READ_CON)
+SYS_CON = (READ_INDEX(0) ||| WRITE_INDEX(0) ) -- add parameter XXX
+	   [|{|crd, cwr, rd_ri, rd_wi |}|] 	-- nur erster test funktioniert
+--	 [|{|rd_ri, rd_wi |}|]			-- letzte beiden tests funktioneren
+	  (WRITE_CON ||| READ_CON )
 
 
 -----------------------------------------------------------------
@@ -97,7 +98,7 @@ channel rd_ri : { 0..max } -- Kanal zum Lesen des Read-Index
 channel wr_ri : { 0..max } -- Kanal zum Schreiben auf den Read-Index
 
 READ_INDEX(i) = 
-	      rd_ri!i -> WRITE_INDEX(i)
+	      rd_ri!i -> READ_INDEX(i)
 	      []
 	      wr_ri?x -> READ_INDEX(i)
 
@@ -144,8 +145,8 @@ CB(i,x) = crd.i!x -> CB(i,x)
 ----------------------------------------------------------------
 
 READ_CON = 
-	 rd_ri?x -> rd_wi?y ->  -- "->" war vorher ";"
-	 if (x != y)
+	 rd_ri?x -> rd_wi?y ->  -- "->" war vorher ";" XXX 
+	 if (x == y) 		-- changed "!=" to "=="
 	then READ_CON
 	else
 	 crd.x?z -> wr_ri!((x+1)%(max+1)) -> READ_CON
@@ -162,16 +163,16 @@ READ_CON =
 ----------------------------------------------------------------
 
 
-WRITE_CON =  [] d: DATA @ WR_CON(d)
-
+--WRITE_CON =  [] d: DATA @ WR_CON(d)
+WRITE_CON = |~| d:DATA @ WR_CON(d) -- XXX changed to internal choice
 WR_CON(d) = 
 	 rd_ri?x -> rd_wi?y ->
-	 let wi = y%(max+1)
+	 let wi = (y+1)%(max+1) -- XXX added y+1
 	 within
-		if (x == wi)  -- "=" zu "=="
+		if (x == wi)  -- "=" zu "==" XXX falsches boolean
 	 	then WRITE_CON
 	 	else
-		cwr.y!d -> wr_wi!wi -> WRITE_CON -- ";" zu "->"
+		cwr.y!d -> wr_wi!wi ->   WRITE_CON -- ";" zu "->" XXX
 
 
 ----------------------------------------------------------------
@@ -192,7 +193,8 @@ SYS_CON_IDENT =
 -- die nur in der Implementierung vorkommen
 ----------------------------------------------------------------
 
-M = {| rd_ri,rd_wi,wr_ri,wr_wi |}  -- added "|" --> alle auspraegungen dieser channels
+M = {| rd_ri,rd_wi,wr_ri,wr_wi |}  -- added pipe alle auspraegungen dieser channels XXX -> zeigt sich durch falschen Typ fuer channels wo M  genutzt wird
+
 
 ASYS_CHAOS = ASYS ||| CHAOS(M)
 

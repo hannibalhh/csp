@@ -38,7 +38,7 @@ SYS = CHECK_MELDER [| {ack, smoke.0, smoke.1,no_smoke.0, no_smoke.1, alarm } |] 
 
 
 -- zweite testversion, noch fehlerhaft. 
-SYS2= 	( MELDER [| { smoke.0, smoke.1,no_smoke.0, no_smoke.1, reset.0, reset.1}   |] 
+SYS2= 	( MELDER [| {| smoke ,no_smoke, reset |}   |] 
 			 (SENSOR(0) [] SENSOR(1)) )		
 	; SYS2 
 
