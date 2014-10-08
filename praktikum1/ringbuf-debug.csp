@@ -28,9 +28,11 @@ DATA = { 0..2 }
 
 max = 2
 
--- added Type DATA to declaration
-channel rd : DATA -- zum Lesen aus dem Puffer
-channel wr : DATA -- zum Schreiben in den Puffer
+-- Fehler 1: Falscher Datentyp: simple channel
+-- Indikator: B(s) verursacht einen Compileerror: Couldn't match expected type
+-- Behebung: added Type DATA to declaration
+channel rd : DATA -- zum Lesen aus dem Puffer -- Fehler 1:
+channel wr : DATA -- zum Schreiben in den Puffer -- Fehler 1:
 
 -- In CSP koennen Sequenzen als Datenstrukturen
 -- in Prozessparametern verwendet werden:
@@ -41,7 +43,7 @@ channel wr : DATA -- zum Schreiben in den Puffer
 
 BUF =  B(<>)
 
-B(s) = (#s > 0) & rd!head(s) -> B(tail(s)) -- hier zeigt sich der Fehler mit "alle auspraegungen " 
+B(s) = (#s > 0) & rd!head(s) -> B(tail(s)) -- hier zeigt sich der Fehler mit "alle auspraegungen "
         []
        (#s < max) & wr?x -> B(s^<x>)  --  
 
@@ -54,8 +56,8 @@ B(s) = (#s > 0) & rd!head(s) -> B(tail(s)) -- hier zeigt sich der Fehler mit "al
 channel process_rd  -- abstraktes Ereignis: verarbeite die gelesenen Daten
 
 
-READ_ABS = rd?x -> process_rd -> READ_ABS
---READ_ABS = rd?x -> READ_ABS 			-- XXX process_rd macht kein sinn und wird nirgendwo genutzt
+--READ_ABS = rd?x -> process_rd -> READ_ABS
+READ_ABS = rd?x -> READ_ABS 			-- XXX process_rd macht kein sinn und wird nirgendwo genutzt
 
 
 -----------------------------------------------------------------
@@ -76,9 +78,12 @@ WRABS(x)  = wr!x -> WRITE_ABS
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 
+-- Fehler 2
+-- Indicator
+-- Behebung
 SYS_CON = (READ_INDEX(0) ||| WRITE_INDEX(0) ) -- add parameter XXX
-	   [|{|crd, cwr, rd_ri, rd_wi |}|] 	-- nur erster test funktioniert
---	 [|{|rd_ri, rd_wi |}|]			-- letzte beiden tests funktioneren
+--	   [|{|crd, cwr, rd_ri, rd_wi |}|] 	-- nur erster test funktioniert
+	 [|{|rd_ri, rd_wi |}|]			-- letzte beiden tests funktioneren, wenn process_rd auskommentiert ist
 	  (WRITE_CON ||| READ_CON )
 
 
@@ -87,7 +92,7 @@ SYS_CON = (READ_INDEX(0) ||| WRITE_INDEX(0) ) -- add parameter XXX
 --
 -- Fuer die unten spezifizierte Implementierung benoetigt
 -- man einen Array der Laenge max+1, um einen FIFO-Puffer
--- der Kapzit�t max zu realisieren.
+-- der Kapzitaet max zu realisieren.
 -----------------------------------------------------------------
 
 
@@ -97,8 +102,11 @@ SYS_CON = (READ_INDEX(0) ||| WRITE_INDEX(0) ) -- add parameter XXX
 channel rd_ri : { 0..max } -- Kanal zum Lesen des Read-Index
 channel wr_ri : { 0..max } -- Kanal zum Schreiben auf den Read-Index
 
+-- Fehler 3: READ_INDEX führt bei einmaligen lesen von rd_ri den Prozess WRITE_INDEX aus
+-- Indikator: statische Codeanalyse
+-- Behebung: WRITE_INDEX wurde durch READ_INDEX ersetzt
 READ_INDEX(i) = 
-	      rd_ri!i -> READ_INDEX(i)
+	      rd_ri!i -> READ_INDEX(i) -- Fehler 3
 	      []
 	      wr_ri?x -> READ_INDEX(i)
 
@@ -144,9 +152,16 @@ CB(i,x) = crd.i!x -> CB(i,x)
 -- erfolgen.
 ----------------------------------------------------------------
 
+-- Fehler 4: Falscher Operator, da es sich um keine Prozesse handelt
+-- Indikator: Compilerfehler: Unexpected token <newline>
+-- Behebung: = Replicated Sequential Composition (;) durch Prefix (->) ersetzt
+
+-- Fehler 5: Bedingung in Verzweigung fehlerhaft
+-- Indikator: Statische Codeanalyse (= in Bedingung -> Augenkrebs)
+-- Behebung: = durch == ersetzt
 READ_CON = 
-	 rd_ri?x -> rd_wi?y ->  -- "->" war vorher ";" XXX 
-	 if (x == y) 		-- changed "!=" to "=="
+	 rd_ri?x -> rd_wi?y ->  -- Fehler 4: "->" war vorher ";"
+	 if (x == y) 		-- Fehler 5: changed "!=" to "=="
 	then READ_CON
 	else
 	 crd.x?z -> wr_ri!((x+1)%(max+1)) -> READ_CON
@@ -162,12 +177,17 @@ READ_CON =
 -- WriteIndex erhoeht.
 ----------------------------------------------------------------
 
+-- Fehler 6: External Choice statt Internal Choice
+-- Indikator: Die Spezifikation  WRITE_ABS schreibt ein Internal Choice vor
+-- Behebung: External Choice durch Internal Choice ersetzt
 
---WRITE_CON =  [] d: DATA @ WR_CON(d)
+-- Fehler 7: Inkrementierung des Writeindex fehlt
+-- Indikator: Vergleich der Implementierung mit dem Kommentar
+-- Behebung: y durch (y+1) ersetzt
 WRITE_CON = |~| d:DATA @ WR_CON(d) -- XXX changed to internal choice
 WR_CON(d) = 
-	 rd_ri?x -> rd_wi?y ->
-	 let wi = (y+1)%(max+1) -- XXX added y+1
+	 rd_ri?x -> rd_wi?y -> -- Fehler 6
+	 let wi = (y+1)%(max+1) -- Fehler 7: added y+1
 	 within
 		if (x == wi)  -- "=" zu "==" XXX falsches boolean
 	 	then WRITE_CON
@@ -193,8 +213,10 @@ SYS_CON_IDENT =
 -- die nur in der Implementierung vorkommen
 ----------------------------------------------------------------
 
-M = {| rd_ri,rd_wi,wr_ri,wr_wi |}  -- added pipe alle auspraegungen dieser channels XXX -> zeigt sich durch falschen Typ fuer channels wo M  genutzt wird
-
+-- Fehler 8: Bei typisierten Channels (wie rd und wr mit dem Simple Type: int) müssen eine konkrete Instanz angegeben werden
+-- Indikator: Compilerfehler: Couldn't match expected type in ASYS_CHAOS (dort wird M genutzt)
+-- Behebung: Hinzufügen der Pips
+M = {| rd_ri,rd_wi,wr_ri,wr_wi |}  -- Fehler 8: added pipe alle auspraegungen dieser channels
 
 ASYS_CHAOS = ASYS ||| CHAOS(M)
 
