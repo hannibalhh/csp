@@ -76,7 +76,7 @@ WRABS(x)  = wr!x -> WRITE_ABS
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 
-SYS_CON = (READ_INDEX ||| WRITE_INDEX) -- TODO : add parameter
+SYS_CON = (READ_INDEX(0) ||| WRITE_INDEX(0)) -- TODO : add parameter
 	  [|{| rd_ri, rd_wi |}|]
 	  (WRITE_CON ||| READ_CON)
 
