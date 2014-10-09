@@ -4,7 +4,7 @@ channel a, b, c, d, f
 
 A={|a, b |}
 
-P = a -> b -> c -> P
+P = a -> b -> c -> SKIP
 Q = a -> ((c -> d -> SKIP ) [] (b -> f -> SKIP))
 
 -- sequential processes
@@ -27,7 +27,32 @@ S5 = P /\ Q
 -- The failures model, written as [F=;
 -- The failures-divergences model, written as [FD=.
 
+assert S1 [T= S2  -- not
+assert S1 [T= S3  -- not
+assert S1 [T= S4  -- not
+assert S1 [T= S5  -- not
+
+assert S2 [T= S1 	-- yes 
+assert S2 [T= S3 	-- not
+assert S2 [T= S4	-- not
+assert S2 [T= S5	-- not
+
 assert S3 [T= S2
 assert S3 [T= S1 -- works!
-assert S3 [T= S4
+assert S3 [T= S4  
+-- funktioniert nicht, da P und Q zuende ausgeführt werden. Bei P [] Q nur einer -> insgesamt kuerzerer Prozess
 assert S3 [T= S5
+
+assert S4 [T= S1 	--not
+assert S4 [T= S2	--not
+assert S4 [T= S3	--not
+assert S4 [T= S5	--not
+
+
+assert S5 [T= S1 -- works
+assert S5 [T= S2 -- not
+assert S5 [T= S3 -- not
+assert S5 [T= S4  --works: Man kann im Graph von S5 entweder direkt nur P oder nur Q gehen, dann ist es aequivalent zu S4 , deswegen ist es enthalten. q.e.d
+
+
+
