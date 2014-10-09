@@ -33,14 +33,8 @@ MELDER = check!0 -> check!1 -> MELDER_ALARM_SUB
 --System-Deklaration -- zu ergänzen
 --===================================================
 
--- das hier ist ziemlich sicher falsch 
-SYS = CHECK_MELDER [| {ack, smoke.0, smoke.1,no_smoke.0, no_smoke.1, alarm } |] MELDER 
-
-
--- zweite testversion, noch fehlerhaft. 
-SYS2= 	( MELDER [| {| smoke ,no_smoke, reset |}   |] 
-			 (SENSOR(0) [] SENSOR(1)) )		
-	; SYS2 
+SYS = MELDER [| {| check, smoke ,no_smoke, reset |}   |] 
+			 (SENSOR(0) ||| SENSOR(1))		
 
 --===================================================
 
@@ -61,6 +55,5 @@ RCV_SMOKES =    smoke.0 -> smoke.1 -> SKIP
 
 
 --Check der Implementierung
- assert CHECK_MELDER [F= SYS\{| check, reset |}
-assert CHECK_MELDER [F= SYS2\{| check, reset |}	
+assert CHECK_MELDER [F= SYS\{| check, reset |}
 
