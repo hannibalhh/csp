@@ -40,7 +40,7 @@ assert S2 [T= S5	-- not
 assert S3 [T= S2
 assert S3 [T= S1 -- works!
 assert S3 [T= S4  
--- funktioniert nicht, da P und Q zuende ausgeführt werden. Bei P [] Q nur einer -> insgesamt kuerzerer Prozess
+-- funktioniert nicht, da P und Q zuende ausgefuehrt werden. Bei P [] Q nur einer -> insgesamt kuerzerer Prozess
 assert S3 [T= S5
 
 assert S4 [T= S1 	--not

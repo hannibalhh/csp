@@ -1,0 +1,13 @@
+Aufgabe 1)
+
+a) STACK3 ist in STACK1 nicht enthalten, da eine Reihenfolge möglich ist, in der STACK3 zwei mal hintereinander pushed. STACK1 kann das nicht.
+
+b)
+STACK1 ist in STACK 3 enthalten, da die Abfolge von STACK1 in STACK3 enthalten ist. Die Reihenfolge dafür ist: STACK3(<>) -> STACK3(<d>)(obere Entscheidung) -> wieder von vorne
+
+Failures beschreiben was niemals vorkommen kann?Welcher pfad nie gewählt wird??? 
+
+c) da läuft das verhalten komplett auseinander. STACK1 will nur pop.1 akzeptieren, STACK3 kann auch mit push.1 weitermachen
+
+d)
+Die Specifikation STACK3 kann 2 Sachen annehmen, aber STACK1 akzeptiert nur einen davon. Der eine Fall der Spezifikation (push.1-> push.1) kann also nicht auftreten
