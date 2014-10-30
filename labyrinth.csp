@@ -39,9 +39,17 @@ H = {vor, rechts, links} -- {[vor, links, rechts]}
 success = hinein  -> hinaus -> SKIP
 
 assert LAB1 \ H [T= success
+
+assert not LAB1 \ H [T= success
+
 assert success [T= LAB1 \ H
 
-assert LAB1 [T= success ||| CHAOS(H)
---assert success ||| CHAOS(H) [T= LAB1
+assert not LAB1 [T= success ||| CHAOS(H)
+assert not success ||| CHAOS(H) [T= LAB1
 
- assert LAB1 [|{| hinein, hinaus |}|] success :[deadlock free [T]]
+assert not LAB1 [|{| hinein, hinaus |}|] success :[deadlock free ]
+
+RUN_H = []x:H @ x -> RUN_H
+assert not LAB1 [T= success ||| RUN_H
+assert not success ||| RUN_H [T= LAB1
+

@@ -1,0 +1,5 @@
+channel a,b,c
+
+K = {a,b,c}
+I = RUN(K)
+RUN_H = []x:K @ x -> RUN_H

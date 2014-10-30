@@ -1,0 +1,9 @@
+channel rd,wr,w,r,b
+
+ASYS = (READ_ABS ||| WRITE_ABS)
+       [| {| rd,wr |} |]
+       BUF
+
+BUF = b->SKIP
+READ_ABS = r->SKIP
+WRITE_ABS = w->SKIP
