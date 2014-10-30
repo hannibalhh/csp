@@ -27,7 +27,6 @@ ZUG_LIST(<h>^s) =
 ------------
 --Basisprozesse
 ------------ 
--- TODO: gleichzeitigkeit hinzufügen (listen)
 SEGMENT  = 	seg_senken?s -> seg_unten!s -> SKIP
 		[]  
 	      	seg_heben?s -> seg_oben!s -> SKIP
@@ -38,8 +37,9 @@ STEUER  = 	 df_anfrage?i   ->  seg_senken!<"r1","r2"> ->
 		set_signal!"g" -> df_freigabe!i
 		->
 		zug_rein?i -> set_signal!"r" -> zug_raus?i ->
-		seg_heben!<"l1","l2"> ->
-		 STEUER
+		HEBEN ; STEUER
+
+HEBEN = seg_heben ! <"l1","l2","r1","r2"> -> SKIP 
 
 SIGNAL (s) = 	get_signal!s -> SIGNAL(s) 
 	     	[]
@@ -56,6 +56,7 @@ ZUG  = zug_kommt?i -> df_anfrage?i -> ZUG2(i)
 ------------
 --Gesamtsystem
 ------------ 
+-- TODO interrupt heben
 SYS= |~| i:ZId @ zug_kommt!i -> ZUG ; (SIGNAL("r") [| {|get_signal, set_signal|} |]   
 	STEUER) [| {|seg_senken, seg_heben, seg_unten, seg_oben |}  |] SEGMENT
 
