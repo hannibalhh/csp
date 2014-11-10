@@ -39,7 +39,7 @@ ZUG2(i) = get_signal?s ->
 
 ZUG(i) = zug_kommt ? x:{i} -> df_anfrage? x:{i} -> ZUG2(i)
 
-RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> RUNZUG
+RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> SKIP
 
 ------------
 --Gesamtsystem
