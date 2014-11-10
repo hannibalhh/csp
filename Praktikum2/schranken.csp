@@ -1,6 +1,7 @@
+transparent normal
+
 -- Spezifikation Schrankensystem mit Pruefungen
 -- Übung TH2, WS 11/12
-
 ----------
 --Datentypen 
 ---------- 
@@ -22,12 +23,10 @@ SEGMENT = seg_senken?s -> seg_unten!s -> SKIP
 		  []  
 	      seg_heben?s -> seg_oben!s -> SKIP
 
-STEUER  = df_anfrage?i -> seg_senken!<"r1","r2"> -> seg_unten?<"r1","r2"> 
-          -> seg_senken!<"l1","l2"> -> seg_unten!<"l1","l2">
+STEUER  = df_anfrage?i -> seg_senken!<"r1","r2"> -> seg_unten?x:{<"r1","r2">}
+          -> seg_senken!<"l1","l2"> -> seg_unten?x:{<"l1","l2">}
           -> set_signal!"g" -> df_freigabe!i 
-          -> zug_rein?i -> set_signal!"r" -> zug_raus?i -> HEBEN ; STEUER
-
-HEBEN = seg_heben!<"l1","l2","r1","r2"> -> SKIP 
+          -> zug_rein?i -> set_signal!"r" -> zug_raus?x:{i} -> seg_heben!<"l1","l2","r1","r2"> -> STEUER
 
 SIGNAL (s) = get_signal!s -> SIGNAL(s) 
 	     	 []
@@ -36,26 +35,38 @@ SIGNAL (s) = get_signal!s -> SIGNAL(s)
 ZUG2(i) = get_signal?s -> 
 	      ((s=="r") & ZUG2(i)
 	      []
-	      (s=="g") & df_freigabe?i -> zug_rein!i -> zug_raus!i -> ZUG)
+	      (s=="g") & df_freigabe?x:{i}-> zug_rein!i -> zug_raus!i -> SKIP)
 
-ZUG = zug_kommt?i -> df_anfrage?i -> ZUG2(i)
+ZUG(i) = zug_kommt ? x:{i} -> df_anfrage? x:{i} -> ZUG2(i)
+
+RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> RUNZUG
 
 ------------
 --Gesamtsystem
 ------------ 
 -- TODO interrupt heben
-SYS = |~| i:ZId @ zug_kommt!i -> ZUG ; (SIGNAL("r") [| {|get_signal, set_signal|} |]   
-	STEUER) [| {|seg_senken, seg_heben, seg_unten, seg_oben |}  |] SEGMENT
-	
+SYS = ((SIGNAL("r")
+    [| {|get_signal, set_signal|}                       |] STEUER)
+	[| {|seg_senken, seg_heben, seg_unten, seg_oben |}  |] SEGMENT)
+	[| {|zug_rein,zug_raus|}                            |] RUNZUG
+
 ------------
 --Prüfungen
------------- 
+------------
 
 -- Zug fährt nur wenn alle Schranken unten sind
 
+ Positivetest(x) = df_anfrage?x -> seg_senken!<"r1","r2"> -> seg_unten?<"r1","r2">
+          -> seg_senken!<"l1","l2"> -> seg_unten!<"l1","l2">
+          -> set_signal!"g" -> df_freigabe!x
+          -> zug_rein?y:{x} -> set_signal!"r" -> zug_raus?y:{x} -> seg_heben !<"l1","l2","r1","r2"> -> SKIP
 
 -- Kein Zug ist dauerhaft blockiert
 assert SYS :[deadlock free [F]]
-assert ZUG :[deadlock free [F]]
+P = |~| i:ZId @ Positivetest(i);P
+assert STEUER [T= P
+
+ZUGZUGZUG = |~| i:ZId @ ZUG(i) ; ZUGZUGZUG
+assert ZUGZUGZUG :[deadlock free [F]]
 
 

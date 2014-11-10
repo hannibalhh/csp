@@ -10,4 +10,4 @@ Failures beschreiben was niemals vorkommen kann?Welcher pfad nie gewählt wird??
 c) da läuft das verhalten komplett auseinander. STACK1 will nur pop.1 akzeptieren, STACK3 kann auch mit push.1 weitermachen
 
 d)
-Die Specifikation STACK3 kann 2 Sachen annehmen, aber STACK1 akzeptiert nur einen davon. Der eine Fall der Spezifikation (push.1-> push.1) kann also nicht auftreten
+Die Spezifikation STACK3 kann 2 Sachen annehmen, aber STACK1 akzeptiert nur einen davon. Der eine Fall der Spezifikation (push.1-> push.1) kann also nicht auftreten
