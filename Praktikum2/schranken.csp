@@ -19,9 +19,9 @@ channel get_signal, set_signal: SigStates
 ------------
 --Basisprozesse
 ------------ 
-SEGMENT = seg_senken?s -> seg_unten!s -> SKIP
+SEGMENT = seg_senken?s -> seg_unten!s -> SEGMENT
 		  []  
-	      seg_heben?s -> seg_oben!s -> SKIP
+	      seg_heben?s -> seg_oben!s -> SEGMENT
 
 STEUER  = df_anfrage?i -> seg_senken!<"r1","r2"> -> seg_unten?x:{<"r1","r2">}
           -> seg_senken!<"l1","l2"> -> seg_unten?x:{<"l1","l2">}
@@ -39,7 +39,7 @@ ZUG2(i) = get_signal?s ->
 
 ZUG(i) = zug_kommt ? x:{i} -> df_anfrage? x:{i} -> ZUG2(i)
 
-RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> SKIP
+RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> RUNZUG
 
 ------------
 --Gesamtsystem
@@ -48,7 +48,7 @@ RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> SKIP
 SYS = ((SIGNAL("r")
     [| {|get_signal, set_signal|}                       |] STEUER)
 	[| {|seg_senken, seg_heben, seg_unten, seg_oben |}  |] SEGMENT)
-	[| {|zug_rein,zug_raus|}                            |] RUNZUG
+	[| {|zug_rein,zug_raus,df_anfrage, df_freigabe|}    |] RUNZUG
 
 ------------
 --Prüfungen
