@@ -69,4 +69,6 @@ assert STEUER [T= P
 ZUGZUGZUG = |~| i:ZId @ ZUG(i) ; ZUGZUGZUG
 assert ZUGZUGZUG :[deadlock free [F]]
 
+assert STEUER :[deadlock free [F]]
+assert SYS :[deadlock free [F]]
 
