@@ -59,7 +59,7 @@ SYS = ((SIGNAL("r")
  Positivetest(x) = df_anfrage?x -> seg_senken!<"r1","r2"> -> seg_unten?<"r1","r2">
           -> seg_senken!<"l1","l2"> -> seg_unten!<"l1","l2">
           -> set_signal!"g" -> df_freigabe!x
-          -> zug_rein?y:{x} -> set_signal!"r" -> zug_raus?y:{x} -> seg_heben !<"l1","l2","r1","r2"> -> SKIP
+          -> zug_rein?y:{x} -> set_signal!"r" -> zug_raus?y:{x} -> seg_heben !<"l1","l2","r1","r2"> -> seg_oben? x -> SKIP
 
 -- Kein Zug ist dauerhaft blockiert
 assert SYS :[deadlock free [F]]
