@@ -26,7 +26,7 @@ SEGMENT = seg_senken?s -> seg_unten!s -> SEGMENT
 STEUER  = df_anfrage?i -> seg_senken!<"r1","r2"> -> seg_unten?x:{<"r1","r2">}
           -> seg_senken!<"l1","l2"> -> seg_unten?x:{<"l1","l2">}
           -> set_signal!"g" -> df_freigabe!i 
-          -> zug_rein?i -> set_signal!"r" -> zug_raus?x:{i} -> seg_heben!<"l1","l2","r1","r2"> -> STEUER
+          -> zug_rein?i -> set_signal!"r" -> zug_raus?x:{i} -> seg_heben!<"l1","l2","r1","r2"> -> seg_oben? x -> STEUER
 
 SIGNAL (s) = get_signal!s -> SIGNAL(s) 
 	     	 []
@@ -37,7 +37,7 @@ ZUG2(i) = get_signal?s ->
 	      []
 	      (s=="g") & df_freigabe?x:{i}-> zug_rein!i -> zug_raus!i -> SKIP)
 
-ZUG(i) = zug_kommt ? x:{i} -> df_anfrage? x:{i} -> ZUG2(i)
+ZUG(i) = zug_kommt ? x:{i} -> df_anfrage ! x -> ZUG2(i)
 
 RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> RUNZUG
 
@@ -48,7 +48,7 @@ RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> RUNZUG
 SYS = ((SIGNAL("r")
     [| {|get_signal, set_signal|}                       |] STEUER)
 	[| {|seg_senken, seg_heben, seg_unten, seg_oben |}  |] SEGMENT)
-	[| {|zug_rein,zug_raus,df_anfrage, df_freigabe|}    |] RUNZUG
+	[| {| zug_rein,zug_raus,df_anfrage, df_freigabe|}    |] RUNZUG
 
 ------------
 --Prüfungen
