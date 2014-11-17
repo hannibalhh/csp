@@ -26,7 +26,9 @@ SEGMENT = seg_senken?s -> seg_unten!s -> SEGMENT
 STEUER  = df_anfrage?i -> seg_senken!<"r1","r2"> -> seg_unten?x:{<"r1","r2">}
           -> seg_senken!<"l1","l2"> -> seg_unten?x:{<"l1","l2">}
           -> set_signal!"g" -> df_freigabe!i 
-          -> zug_rein?i -> set_signal!"r" -> zug_raus?x:{i} -> seg_heben!<"l1","l2","r1","r2"> -> seg_oben? x -> STEUER
+          -> zug_rein?i -> set_signal!"r" -> zug_raus?x:{i} -> HEBEN ; STEUER
+
+HEBEN = seg_heben!<"l1","l2","r1","r2"> -> seg_oben? x:{ <"l1","l2","r1","r2"> } -> SKIP
 
 SIGNAL (s) = get_signal!s -> SIGNAL(s) 
 	     	 []
@@ -39,7 +41,7 @@ ZUG2(i) = get_signal?s ->
 
 ZUG(i) = zug_kommt ? x:{i} -> df_anfrage ! x -> ZUG2(i)
 
-RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> RUNZUG
+RUNZUG =  |~| i:ZId @ ZUG(i) ; zug_kommt!i -> SEGMENT /\ RUNZUG
 
 ------------
 --Gesamtsystem
@@ -50,6 +52,7 @@ SYS = ((SIGNAL("r")
 	[| {|seg_senken, seg_heben, seg_unten, seg_oben |}  |] SEGMENT)
 	[| {| zug_rein,zug_raus,df_anfrage, df_freigabe|}    |] RUNZUG
 
+
 ------------
 --Prüfungen
 ------------
@@ -59,7 +62,7 @@ SYS = ((SIGNAL("r")
  Positivetest(x) = df_anfrage?x -> seg_senken!<"r1","r2"> -> seg_unten?<"r1","r2">
           -> seg_senken!<"l1","l2"> -> seg_unten!<"l1","l2">
           -> set_signal!"g" -> df_freigabe!x
-          -> zug_rein?y:{x} -> set_signal!"r" -> zug_raus?y:{x} -> seg_heben !<"l1","l2","r1","r2"> -> seg_oben? x -> SKIP
+          -> zug_rein?y:{x} -> set_signal!"r" -> zug_raus?y:{x} -> seg_heben !<"l1","l2","r1","r2"> -> seg_oben? x:{ <"l1","l2","r1","r2"> } -> SKIP
 
 -- Kein Zug ist dauerhaft blockiert
 assert SYS :[deadlock free [F]]
