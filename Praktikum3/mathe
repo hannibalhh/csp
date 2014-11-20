@@ -1,0 +1,56 @@
+
+1.1)
+a)
+trace(P [] Q) = trace(P) U trace(P) // 6.14
+trace(P /\ Q) = trace(P) U trace(P) // 6.16
+P [] Q = Q /\ P
+
+b)
+traces (Stop) = {⟨⟩} // 6.3
+Prefix-Abgeschlossenheit
+T1 : ⟨⟩ ∈ traces(P) // 6.1
+trace(P) U {⟨⟩} = trace(P) // 6.53
+P /\ Stop = P
+
+c)
+// 6.32:
+traces(P1 |A| P2) =
+{tr ∈ TRACES | ∃ tr1, tr2 •
+tr1 ∈ traces(P1)
+∧ tr2 ∈ traces(P2)
+∧ tr synchA tr1, tr2}
+wenn gilt:
+P1 = P2 = SKIP
+traces(Skip) = {⟨⟩ , ⟨tick⟩} // 6.4
+dann gilt auch:
+synchA ({⟨⟩ , ⟨tick⟩}) = {⟨⟩ , ⟨tick⟩} // 6.39 -> 6.36 (<>) und 6.39 -> 6.37 (<tick>)
+// Die Menge A ist beliebig, da ohne nur die die head und tails
+// von tr1 und tr2 in 6.39 betrachtet werden
+
+1.2)
+
+P1 |{a}| P2 \ {a} =T P3
+[a -> (b -> SKIP) |{a}| c -> SKIP)] \ {a} // 8.72
+[a -> (b -> (SKIP |{a}| (c -> SKIP)) [] c -> ((b -> SKIP) |{a}| SKIP))] \ {a} // 8.69
+[a -> (b -> (c -> (SKIP |{a}| SKIP )) [] c -> (b -> (SKIP |{a}| SKIP)) )] \ {a} // 8.70
+[(b -> c -> SKIP) [] (c -> b -> SKIP)] \ {a} // 8.80
+(b -> c -> SKIP)\ {a} [] (c -> b -> SKIP)\ {a} // wie 8.81 nur mit external choice
+(b -> c -> (SKIP \ {a}) [] (c -> b -> (SKIP \ {a})  // 8.79 (mehrfach)
+b -> c -> SKIP [] c -> b -> SKIP // 8.85
+
+2)
+
+STOP |~| (P [] Q) 
+(STOP |~| P) [] (STOP |~| Q) // 8.25
+((STOP |~| P) [] STOP) |~| ((STOP |~| P) [] Q) // 8.19
+((STOP |~| P)) |~| ((STOP |~| P) [] Q) // 8.6
+((STOP |~| P) |~| (STOP |~| P)) [] ((STOP |~| P) |~|  Q) // 8.25
+(STOP |~| P) [] ((STOP |~| P) |~|  Q) // 8.16
+(STOP |~| P) [] (STOP |~| (P |~|  Q)) // 8.17
+STOP |~| (P [] (P |~| Q)) // 8.25
+STOP |~| ((P [] P) |~| (P [] Q)) // 8.19
+STOP |~| (P |~| (P [] Q)) // 8.3
+STOP |~| (P |~| (P [] Q) |~| (P [] Q)) // 8.16
+STOP |~| (P |~| (P [] P) |~| (P [] Q) |~| (P [] Q) |~| (Q [] Q) // 8.19 (mehrfach)
+STOP |~| (P |~| P |~| (P [] Q) |~| Q) // 8.3
+
