@@ -13,3 +13,8 @@ assert N0 [T= X0
 assert N0 [F= X0 
 assert X0 [T= N0 
 assert X0 [F= N0
+
+M0 = SKIP [] (a-> M0 [] b -> M1 [] b-> M2)
+M1 = (a -> M3 [] b -> M2) [] SKIP
+M2 = (a -> M0 [] b ->M3)
+M3 = (a -> M3) [] b -> M3

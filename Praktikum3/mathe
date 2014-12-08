@@ -4,12 +4,19 @@ a)
 trace(P [] Q) = trace(P) U trace(P) // 6.14
 trace(P /\ Q) = trace(P) U trace(P) // 6.16
 P [] Q = Q /\ P
+wegen der Kommutativität gilt diese Aussage
 
 b)
 traces (Stop) = {⟨⟩} // 6.3
 Prefix-Abgeschlossenheit
 T1 : ⟨⟩ ∈ traces(P) // 6.1
 trace(P) U {⟨⟩} = trace(P) // 6.53
+trace(P /\ Stop) = traces(P) U t1^t2 | t1 e traces(P) * tick ne o(t1) and t2 e traces(STOP)
+traces(P) U t1^<> | t1 e traces(P) and tick ne o(t1)
+traces(P) U {t1 | t1 e traces(P) and tick o(t1)}
+trace(t2) = {⟨⟩}
+X = t1 | t1 e traces(P) and tick o(t1)}
+X contains traces(P)
 P /\ Stop = P
 
 c)
@@ -19,6 +26,8 @@ traces(P1 |A| P2) =
 tr1 ∈ traces(P1)
 ∧ tr2 ∈ traces(P2)
 ∧ tr synchA tr1, tr2}
+eine Folge <a,b,c> ist eine Folge von Events, dies ist kein trace.
+-> 6.32 ist nicht anwendbar
 wenn gilt:
 P1 = P2 = SKIP
 traces(Skip) = {⟨⟩ , ⟨tick⟩} // 6.4
@@ -26,6 +35,7 @@ dann gilt auch:
 synchA ({⟨⟩ , ⟨tick⟩}) = {⟨⟩ , ⟨tick⟩} // 6.39 -> 6.36 (<>) und 6.39 -> 6.37 (<tick>)
 // Die Menge A ist beliebig, da ohne nur die die head und tails
 // von tr1 und tr2 in 6.39 betrachtet werden
+
 
 1.2)
 
@@ -38,11 +48,24 @@ P1 |{a}| P2 \ {a} =T P3
 (b -> c -> (SKIP \ {a}) [] (c -> b -> (SKIP \ {a})  // 8.79 (mehrfach)
 b -> c -> SKIP [] c -> b -> SKIP // 8.85
 
+Aus der Vorlesung:
+(a -> b -> SKIP) |{a}| (a-> c -> SKIP)] \ {a} 
+=T 8.72[a -> (b -> SKIP) |{a}| c -> SKIP)] \ {a} 
+=T 8.80 (b -> SKIP) |{a}| c -> SKIP) \ {a} 
+=T 8.69 ((b -> (SKIP |{a}| (c -> SKIP ))) [] (c -> (b -> ((SKIP |{a}| SKIP))) \ {a} 
+=T 6.63+8.61 ((b -> (SKIP |{a}| (c -> SKIP ))) [] (c -> b -> SKIP)) \ {a} 
+=T 8.57,8.63,8.61 (b->c->SKIP) [] ( c -> b -> SKIP) \ {a}
+=T 8.15,8.81 (b -> c ->SKIP) \ {a} |~| (c-> b -> SKIP) \ {a}
+=T 8.79,8.85,8.15 (b-> c -> SKIP) [] (c -> b -> SKIP)
+
+Im Tracesmodell ist external oder internal Choice gleich und kann getauscht werde 
+
+
 2)
 
 STOP |~| (P [] Q) 
 (STOP |~| P) [] (STOP |~| Q) // 8.25
-((STOP |~| P) [] STOP) |~| ((STOP |~| P) [] Q) // 8.19
+((STOP |~| P) [] STOP) |~| ((STOP |~| P) [] Q) // 8.19+8.17
 ((STOP |~| P)) |~| ((STOP |~| P) [] Q) // 8.6
 ((STOP |~| P) |~| (STOP |~| P)) [] ((STOP |~| P) |~|  Q) // 8.25
 (STOP |~| P) [] ((STOP |~| P) |~|  Q) // 8.16
@@ -54,3 +77,15 @@ STOP |~| (P |~| (P [] Q) |~| (P [] Q)) // 8.16
 STOP |~| (P |~| (P [] P) |~| (P [] Q) |~| (P [] Q) |~| (Q [] Q) // 8.19 (mehrfach)
 STOP |~| (P |~| P |~| (P [] Q) |~| Q) // 8.3
 
+Aus der Vorlesung:
+STOP |~| (P [] Q) 
+=T 8.25 (STOP |~| P) [] (STOP |~| Q) 
+=T 8.19 ((STOP |~| P) []  Q) |~| (STOP |~| P)
+=T 8.19+8.17 (P [] Q) |~| (STOP [] Q) |~| ((STOP [] STOP)) 
+=T 8.6 (P [] Q) |~| Q |~| P |~| STOP
+
+3)
+Aus der Vorlesung:
+Wenn das Tracesmodell nicht gilt, gilt auch keine Failuresmodell.
+Gegenbeispiele:
+bba-> konkreter Trace als Gegenbeispiel (einer reicht)
