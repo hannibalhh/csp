@@ -1,47 +1,55 @@
 nametype Id = {0,1,2,3}
 nametype Timeslots = {1..10}
-channel set_idle, set_waiting, set_active, start_task : Id
-channel request: Id.Timeslots
+channel set_idle, set_waiting, set_active, start_task, idle, waiting, eager : Id
+channel request, idt, active : Id.Timeslots 
 channel clock
 
-TASK(id, t) =   id <=0 & TASK(0, 0)
-	--	id <
+
+TASK_WA = idt?id?t -> TASK(id,t)
+
+TASK(id, t) =   id <=0 & SKIP
 		[]
-		id > 0 & ( 
-			idle?{t,id} -> TASK(id, t)
+		id > 0 & (
+		
+			start_task?id -> eager!id -> request!id!t ->  TASK(id, t)
 			[]
-			start_task?id -> eager -> request!{id, t} ->  TASK(id, t)
+			set_waiting?id -> waiting!id -> TASK(id, t)
 			[]
-			set_waiting?id -> waiting!{id, t} -> TASK(id, t)
+			set_active?id -> active!id!t -> TASK(id, t)
 			[]
-			set_active?id -> active!{id, t} -> SKIP
-			[]
-			set_idle -> idle!{id,t} -> TASK(id, t) 
+			set_idle?id ->idle!id -> --TASK(id,t)
+                                (t > 0   & TASK(id, t)
+                                []
+	  			t <= 0	 & SKIP
+	  			)
+
+ 
 		)
 
-SCHED() =       (clock -> (active?{id, t} -> 
-				t>0 ? active!{id, t-1} -> SCHED()
-				t<=0? SCHED()	
-			)
-			[]
-			active!{0,0}
-		
-		) 
+SCHED 	=       active?id?t -> WAIT(t) ;SCHED
 		[]
-		request?{id, t} -> set_waiting!{id,t} -> SCHED()
+		request?id?t -> set_waiting!id -> SCHED
+		[] 
+		waiting?id -> set_active!id -> SCHED
 		
 		
 		
-CLOCK() = clock -> CLOCK()
+CLOCK 	= clock -> CLOCK
 
---WAIT(t) =  t>0 ? active!{id, t-1} -> WAIT()
---           t<=0? WAIT()
+--decrease(t) = t-1
+
+WAIT(t) = clock -> (
+	 t>1  & active?id?t -> active!id!(t-1) -> WAIT(t-1)
+	 []
+         t<=1 & SKIP
+	)
 
 
 
 SYS= -- choose id and t
-	SCHED() [| set_waiting, set_active, set_idle, active |] TASK(id, t) -> SYS;
-	CLOCK() [| clock |] SCHED()
+	idt!1!3->
+	-- TASK(1,3); --TASK(2,5);TASK(3,6);
+	( SCHED [| {| set_waiting, set_active,set_idle,active |} |] TASK_WA ) [| {clock} |] CLOCK
 
 
 
