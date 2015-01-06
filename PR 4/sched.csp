@@ -1,0 +1,47 @@
+nametype Id = {0,1,2,3}
+nametype Timeslots = {1..10}
+channel set_idle, set_waiting, set_active, start_task : Id
+channel request: Id.Timeslots
+channel clock
+
+TASK(id, t) =   id <=0 & TASK(0, 0)
+	--	id <
+		[]
+		id > 0 & ( 
+			idle?{t,id} -> TASK(id, t)
+			[]
+			start_task?id -> eager -> request!{id, t} ->  TASK(id, t)
+			[]
+			set_waiting?id -> waiting!{id, t} -> TASK(id, t)
+			[]
+			set_active?id -> active!{id, t} -> SKIP
+			[]
+			set_idle -> idle!{id,t} -> TASK(id, t) 
+		)
+
+SCHED() =       (clock -> (active?{id, t} -> 
+				t>0 ? active!{id, t-1} -> SCHED()
+				t<=0? SCHED()	
+			)
+			[]
+			active!{0,0}
+		
+		) 
+		[]
+		request?{id, t} -> set_waiting!{id,t} -> SCHED()
+		
+		
+		
+CLOCK() = clock -> CLOCK()
+
+--WAIT(t) =  t>0 ? active!{id, t-1} -> WAIT()
+--           t<=0? WAIT()
+
+
+
+SYS= -- choose id and t
+	SCHED() [| set_waiting, set_active, set_idle, active |] TASK(id, t) -> SYS;
+	CLOCK() [| clock |] SCHED()
+
+
+
