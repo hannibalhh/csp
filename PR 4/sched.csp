@@ -1,3 +1,4 @@
+transparent normal
 nametype Id = {0,1,2,3}
 nametype Timeslots = {1..10}
 channel set_idle, set_waiting, set_active, start_task, idle, waiting, eager : Id
@@ -26,7 +27,7 @@ TASK(id, t) =   id <=0 & SKIP
  
 		)
 
-SCHED 	=       active?id?t -> WAIT(t) ;SCHED
+SCHED 	=       active?id?t -> WAIT ;SCHED
 		[]
 		request?id?t -> set_waiting!id -> SCHED
 		[] 
@@ -38,10 +39,10 @@ CLOCK 	= clock -> CLOCK
 
 --decrease(t) = t-1
 
-WAIT(t) = clock -> (
-	 t>1  & active?id?t -> active!id!(t-1) -> WAIT(t-1)
+WAIT = clock -> active?id?t -> (
+	( t>1)  & active!id!(t-1) -> WAIT
 	 []
-         t<=1 & SKIP
+         (t <= 1) & SKIP
 	)
 
 
