@@ -1,0 +1,19 @@
+# 1.1 
+## Stable Failures in Transitionsgraphen
+
+R11: R = {}
+R13: R = {}
+R14: R = {}
+
+- - -
+
+R12: 
+R = {a, b, e, f, ✓ }
+R15: 
+R = {a, b, c, e, f, ✓ }
+R16: 
+R = {c, d , e, f, ✓ }
+R17: 
+R = {a, b, c, d , e, f, ✓ }
+R18:
+R = { ✓ }
