@@ -5,29 +5,40 @@ channel set_idle, set_waiting, set_active, start_task, idle, waiting, eager : Id
 channel request, idt, active : Id.Timeslots 
 channel clock
 
+A={|set_idle, idle, set_waiting, waiting, set_active, start_task, eager, request, idt, active, clock|}
 
-TASK_WA = idt?id?t -> TASK(id,t)
 
-TASK(id, t) =   id <=0 & SKIP
-		[]
-		id > 0 & (
+
+START_DUMMY = start_task!0 -> SKIP
+START_NORMAL = idt?id?t -> start_task!id -> SKIP
+
+TASK_WA =  (START_DUMMY /\ START_NORMAL); TASK_WA
+		--(start_task!0  /\ 
+		--	(idt?id?t -> start_task!id )) ; TASK_WA 
+			--\{|set_idle, idle, set_waiting, waiting, start_task, eager, request, idt, clock|})) ; TASK_WA
+
+TASK(id, t) =  --id <=0 & active!id!t -> SKIP
+	--	[]
+	--	id > 0 & (
 		
 			start_task?id -> eager!id -> request!id!t ->  TASK(id, t)
 			[]
 			set_waiting?id -> waiting!id -> TASK(id, t)
 			[]
 			set_active?id -> active!id!t -> TASK(id, t)
+		--	[]
+		--	active?id?t -> TASK(id,t)
 			[]
 			set_idle?id ->idle!id -> --TASK(id,t)
-                                (t > 0   & TASK(id, t)
+                                ( (t > 1)   & TASK(id, t)
                                 []
-	  			t <= 0	 & SKIP
+	  			(t <= 1) 	 & SKIP
 	  			)
 
  
-		)
+	--	)
 
-SCHED 	=       active?id?t -> WAIT ;SCHED
+SCHED 	=       active?id?t ->  WAIT(t) ;SCHED
 		[]
 		request?id?t -> set_waiting!id -> SCHED
 		[] 
@@ -39,18 +50,56 @@ CLOCK 	= clock -> CLOCK
 
 --decrease(t) = t-1
 
-WAIT = clock -> active?id?t -> (
-	( t>1)  & active!id!(t-1) -> WAIT
+WAIT(t) = clock -> (
+	( t>1)  & WAIT(t-1)
 	 []
          (t <= 1) & SKIP
 	)
 
 
+S=TASK(1,3) ||| TASK(2,5) ||| TASK(3,6) ||| SYS
 
 SYS= -- choose id and t
-	idt!1!3->
-	-- TASK(1,3); --TASK(2,5);TASK(3,6);
-	( SCHED [| {| set_waiting, set_active,set_idle,active |} |] TASK_WA ) [| {clock} |] CLOCK
+	--idt!1!3->
+	
+	( SCHED [| {| set_waiting, set_active,set_idle, request, waiting |} |] TASK_WA ) [| {clock} |] CLOCK 
+
+
+-- TESTS --
+
+--TEST 01: show a process with id 1, which runs for 3 clock signals and afterwards runs only id 0
+TEST01=active?1?5 -> clock -> clock -> clock -> TEST01SUB 
+TEST01SUB = active?0?1 -> clock -> TEST01SUB
+--SYSTEST01= TASK(1,5) -> start_task!1 -> SYS
+assert (SYS [| {|active|} |]  TASK(0,1))\{|set_idle, idle, set_waiting, waiting, set_active, start_task, eager, request, idt|} [T= TEST01SUB 
+
+-- TEST02: wait - runterzaehlen
+TEST02= clock -> clock -> clock ->  clock ->  clock -> SKIP
+assert  [] i:Timeslots @  WAIT(i) [T= TEST02 
+
+-- TEST03: vorgegebener Ablauf fuer Task 1
+TEST03 = idt?1?3 -> start_task!1 -> start_task?1-> eager!1 -> request!1!3 -> set_waiting?1 -> waiting?1 -> set_active?1 -> active!1!3 -> clock -> clock -> clock -> SKIP--CHAOS(A)
+
+assert (SYS [| {|active|} |] ( TASK(0,1) |||TASK(1,3) ))/\SKIP [T= TEST03
+
+TEST04 = active!1!3 -> clock -> clock -> clock -> SKIP
+assert SYS /\ SKIP \ {|idt,start_task,eager,request,set_waiting,set_active,waiting|} [T= TEST04
+
+
+TEST05 = active!1!3 -> clock -> clock -> clock -> TEST01SUB
+assert SYS \ {|idt,start_task,eager,request,set_waiting,set_active,waiting|} [T= TEST05
+
+
+TEST06 = active!1!3 -> clock -> clock -> clock -> 
+	active!0!1 -> clock ->
+	active!2!5 -> clock -> clock -> clock -> clock -> clock -> TEST01SUB
+
+assert SYS \ {|idt,start_task,eager,request,set_waiting,set_active,waiting|} [T= TEST06
+
+
+
+
+
 
 
 
