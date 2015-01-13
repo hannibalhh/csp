@@ -4,7 +4,11 @@
 R11: R = {}
 R13: R = {}
 R14: R = {}
-—- Erben? Nach definition werden alle Refuselmengenn von Nachfolgezuständen in die Refuselmengel hinzugefügt, die mit einer leeren Sequenz übergehen. Ist damit auch ein tau Übergang gemeint? Wenn ja, müsste R11 von R14 und R18 erben, R13 von R15 und R14 von R18
+—- 
+Erben? Nach Definition werden alle Refuselmengenn von Nachfolgezuständen in die Refuselmengel hinzugefügt, die mit einer leeren Sequenz übergehen. Ist damit auch ein tau Übergang gemeint? Wenn ja, müsste R11 von R14 und R12,R17,R18 erben, R13 von R15 und R14 von R17,R18
+R11: R = {a, b, c, d , e, f, ✓ }
+R13: R = {a, b, c, e, f, ✓}
+R14: R = {a, b, c, d , e, f, ✓}
 - - -
 
 R12: 
@@ -17,4 +21,3 @@ R17:
 R = {a, b, c, d , e, f, ✓ }
 R18:
 R = { f, ✓ }
-—- Tick?
